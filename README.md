@@ -1,56 +1,86 @@
-# Welcome to your Expo app 👋
+# 📱 Pokédex Móvil — Desarrollo en Ambientes Móviles
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil tipo Pokédex desarrollada como proyecto para la asignatura **Desarrollo en Ambientes Móviles**. Permite buscar un Pokémon por nombre o número y consultar su imagen, tipos, altura, peso y movimientos.
 
-## Get started
+## 🧩 Arquitectura
 
-1. Install dependencies
+El proyecto está dividido en dos componentes independientes:
 
-   ```bash
-   npm install
-   ```
+┌─────────────────┐ ┌──────────────────────┐ ┌───────────────┐
+│ App Móvil │ HTTP │ Microservicio Node │ HTTP │ PokeAPI │
+│ (Expo / RN) │ ─────► │ (Express) │ ─────► │ (pública) │
+└─────────────────┘ └──────────────────────┘ └───────────────┘
 
-2. Start the app
 
-   ```bash
-   npx expo start
-   ```
+- El **front** (app móvil) nunca consulta directamente la PokeAPI. Envía la búsqueda a nuestro propio backend.
+- El **backend (microservicio)** recibe la petición, consulta la PokeAPI pública, transforma la respuesta a un formato simplificado y se la devuelve al front.
+- Esto desacopla el front de la API externa: si mañana cambia la PokeAPI, solo se ajusta el microservicio.
 
-In the output, you'll find options to open the app in a
+### Frontend
+- **Framework:** [Expo](https://expo.dev) + React Native
+- **Lenguaje:** TypeScript
+- **Navegación:** Expo Router (file-based routing) con tabs (`Buscar` / `Info`)
+- **Manejo de estado global:** React Context API (`PokemonContext`), para compartir entre pantallas el Pokémon buscado sin pasar props ni repetir llamadas al backend
+- **UI:** componentes nativos de React Native + `@expo/vector-icons` + `react-native-svg` para los íconos de tipo
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Backend (microservicio propio)
+- **Framework:** [Express](https://expressjs.com/) sobre Node.js
+- **Función:** expone un único endpoint `GET /api/pokemon/:query` que recibe el nombre o número del Pokémon, consulta `https://pokeapi.co/api/v2/pokemon/:query`, normaliza la respuesta (imagen, tipos, movimientos, altura, peso) y la retorna en JSON al front
+- **CORS:** habilitado con el paquete `cors` para permitir las peticiones desde la app móvil
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📲 Pantallas y Context
 
-## Get a fresh project
+| Pantalla | Contenido |
+|---|---|
+| **Buscar** | Barra de búsqueda, imagen del Pokémon, nombre y tipos |
+| **Info** | Altura, peso y lista de movimientos del Pokémon buscado |
 
-When you're ready, run:
+Ambas pantallas consumen el mismo `PokemonContext`: la pantalla **Buscar** dispara la búsqueda contra el microservicio y guarda el resultado en el contexto; la pantalla **Info** solo lee ese estado, sin volver a pedir datos.
+
+## 🚀 Cómo correr el proyecto
+
+### 1. Backend (microservicio)
 
 ```bash
-npm run reset-project
+cd pokemon-microservice
+npm install
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+El servidor queda escuchando en `http://localhost:3000`.
 
-### Other setup steps
+### 2. Frontend (app móvil)
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Antes de correr la app, configura la IP local de tu máquina en `src/constants/api.ts`:
 
-## Learn more
+```ts
+export const API_BASE_URL = 'http://TU_IP_LOCAL:3000';
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+> El celular y el PC deben estar en la misma red Wi-Fi. Usa `10.0.2.2` en vez de tu IP si pruebas en el emulador de Android Studio.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Luego:
 
-## Join the community
+```bash
+npm install
+npx expo start
+```
 
-Join our community of developers creating universal apps.
+En la salida podrás abrir la app en:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go)
+
+## 🛠️ Stack completo
+
+| Capa | Tecnología |
+|---|---|
+| Frontend | Expo, React Native, TypeScript, Expo Router, Context API |
+| Backend | Node.js, Express, CORS |
+| Fuente de datos | [PokeAPI](https://pokeapi.co/) (consumida únicamente por el backend) |
+
+## 🎓 Contexto académico
+
+Proyecto desarrollado para la asignatura **Desarrollo en Ambientes Móviles**, con el objetivo de implementar una arquitectura de microservicio propio como intermediario entre el cliente móvil y una API pública, además del uso de Context API para el manejo de estado compartido entre pantallas.
