@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
-import { API_BASE_URL } from '../constants/api';
+import { POKEMON_API_URL } from '../constants/api';
 import { PokemonData } from '../types/pokemon';
 
 interface PokemonContextType {
@@ -31,7 +31,7 @@ export function PokemonProvider({ children }: { children: ReactNode }) {
     setErrorMsg(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/pokemon/${trimmed}`);
+      const response = await fetch(`${POKEMON_API_URL}/api/pokemon/${encodeURIComponent(trimmed)}`);
       if (!response.ok) throw new Error('Pokemon not found');
       const data: PokemonData = await response.json();
       setPokemon(data);

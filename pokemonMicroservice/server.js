@@ -6,6 +6,8 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
+// ---------- Pokémon (PokeAPI) ----------
+
 app.get('/api/pokemon/:query', async (req, res) => {
   const query = req.params.query.toLowerCase().trim();
 
@@ -43,6 +45,71 @@ app.get('/api/pokemon/:query', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al consultar PokeAPI' });
+  }
+});
+
+// ---------- Frutas del Diablo (One Piece API) ----------
+
+const ONE_PIECE_FRUITS_URL = 'https://api.api-onepiece.com/v2/fruits/en';
+const FRUIT_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hora
+
+let fruitsCache = null;
+let fruitsCacheTimestamp = 0;
+
+async function getAllFruits() {
+  const isCacheFresh = fruitsCache && (Date.now() - fruitsCacheTimestamp) < FRUIT_CACHE_TTL_MS;
+  if (isCacheFresh) {
+    return fruitsCache;
+  }
+
+  const response = await fetch(ONE_PIECE_FRUITS_URL);
+  if (!response.ok) {
+    throw new Error('No se pudo obtener el listado de frutas de la One Piece API');
+  }
+
+  const data = await response.json();
+  fruitsCache = data;
+  fruitsCacheTimestamp = Date.now();
+  return data;
+}
+
+app.get('/api/fruit/:query', async (req, res) => {
+  const query = req.params.query.toLowerCase().trim();
+
+  try {
+    const fruits = await getAllFruits();
+
+    let found;
+    if (/^\d+$/.test(query)) {
+      const id = parseInt(query, 10);
+      found = fruits.find((f) => f.id === id);
+    } else {
+      // Primero intentamos una coincidencia exacta (nombre en inglés o
+      // nombre original en japonés), y si no hay, una coincidencia parcial.
+      found = fruits.find(
+        (f) => f.name?.toLowerCase() === query || f.roman_name?.toLowerCase() === query
+      ) ?? fruits.find(
+        (f) => f.name?.toLowerCase().includes(query) || f.roman_name?.toLowerCase().includes(query)
+      );
+    }
+
+    if (!found) {
+      return res.status(404).json({ error: 'Fruta no encontrada' });
+    }
+
+    const result = {
+      id: found.id,
+      name: found.name,
+      romanName: found.roman_name ?? 'NA',
+      type: found.type ?? 'NA',
+      description: found.description?.trim() ? found.description : 'Sin descripción disponible.',
+      image: found.filename ?? null,
+    };
+
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al consultar la One Piece API' });
   }
 });
 

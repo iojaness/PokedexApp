@@ -19,14 +19,18 @@ export interface PokemonSprites {
   };
 }
 
-export interface PokemonApiResponse {
-  id: number;
+export interface PokemonStats {
+  hp: number;
+  attack: number;
+  defense: number;
+  specialAttack: number;
+  specialDefense: number;
+  speed: number;
+}
+
+export interface PokemonForm {
   name: string;
-  height: number;
-  weight: number;
-  moves: PokemonMove[];
-  types: PokemonType[];
-  sprites: PokemonSprites;
+  image: string;
 }
 
 export interface PokemonData {
@@ -37,4 +41,9 @@ export interface PokemonData {
   image: string | null;
   moves: string[];
   types: string[];
+  stats: PokemonStats;
+  hasGenderDifference: boolean;
+  imageFemale: string | null;
+  hasAlternateForms: boolean;
+  forms: PokemonForm[];
 }

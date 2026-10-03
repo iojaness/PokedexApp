@@ -1,24 +1,24 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {
-  ActivityIndicator, Image, KeyboardAvoidingView, Platform,
-  ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,
+    ActivityIndicator, Image, KeyboardAvoidingView, Platform,
+    ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import TypeBadge from '../../components/typeBadge';
+import FruitTypeBadge from '../../components/fruitTypeBadge';
 import { PIRATE } from '../../constants/theme';
-import { usePokemon } from '../../context/PokemonContext';
+import { useFruit } from '../../context/FruitContext';
 
-export default function SearchScreen() {
-  const { query, setQuery, pokemon, loading, errorMsg, searchPokemon } = usePokemon();
+export default function FruitSearchScreen() {
+  const { query, setQuery, fruit, loading, errorMsg, searchFruit } = useFruit();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Ionicons name="compass-outline" size={26} color={PIRATE.goldLight} />
-          <Text style={styles.headerTitle}>Bitácora Pokémon</Text>
+          <Ionicons name="skull-outline" size={26} color={PIRATE.goldLight} />
+          <Text style={styles.headerTitle}>Registro de Akuma no Mi</Text>
         </View>
-        <Ionicons name="skull-outline" size={24} color={PIRATE.goldLight} />
+        <Ionicons name="nutrition-outline" size={24} color={PIRATE.goldLight} />
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -26,16 +26,16 @@ export default function SearchScreen() {
           <View style={styles.searchRow}>
             <TextInput
               style={styles.input}
-              placeholder="Ej: pikachu o 25"
+              placeholder="Ej: Mera Mera o 82"
               placeholderTextColor={PIRATE.inkFaded}
               value={query}
               onChangeText={setQuery}
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="search"
-              onSubmitEditing={searchPokemon}
+              onSubmitEditing={searchFruit}
             />
-            <TouchableOpacity style={styles.button} onPress={searchPokemon} disabled={loading}>
+            <TouchableOpacity style={styles.button} onPress={searchFruit} disabled={loading}>
               <Ionicons name="search" size={22} color={PIRATE.parchmentLight} />
             </TouchableOpacity>
           </View>
@@ -43,37 +43,33 @@ export default function SearchScreen() {
           <View style={styles.imageBox}>
             {loading ? (
               <ActivityIndicator size="large" color={PIRATE.bloodRed} />
-            ) : pokemon?.image ? (
-              <Image source={{ uri: pokemon.image }} style={styles.image} />
+            ) : fruit?.image ? (
+              <Image source={{ uri: fruit.image }} style={styles.image} />
             ) : (
-              <Ionicons name="help-circle-outline" size={90} color={PIRATE.cardBorder} />
+              <Ionicons name="skull-outline" size={90} color={PIRATE.cardBorder} />
             )}
           </View>
 
           {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 
-          {pokemon && (
+          {fruit && (
             <>
               <View style={styles.nameRow}>
-                <Text style={styles.nameText}>{pokemon.name}</Text>
-                <Text style={styles.idText}>#{String(pokemon.id).padStart(3, '0')}</Text>
+                <Text style={styles.nameText}>{fruit.name}</Text>
+                <Text style={styles.idText}>#{String(fruit.id).padStart(3, '0')}</Text>
               </View>
 
-              {pokemon.types.length > 0 && (
-                <View style={styles.typesRow}>
-                  {pokemon.types.map((t) => (
-                    <TypeBadge key={t} type={t} />
-                  ))}
-                </View>
-              )}
+              <View style={styles.typesRow}>
+                <FruitTypeBadge type={fruit.type} />
+              </View>
 
-              <Text style={styles.hintText}>Ve a la pestaña "Info Poké" para ver más detalles.</Text>
+              <Text style={styles.hintText}>Ve a la pestaña "Info Fruta" para ver más detalles.</Text>
             </>
           )}
 
-          {!pokemon && !loading && !errorMsg && (
+          {!fruit && !loading && !errorMsg && (
             <Text style={styles.hintText}>
-              Busca un Pokémon por nombre o número para ver su información.
+              Busca una Fruta del Diablo por nombre o número para descubrir sus poderes.
             </Text>
           )}
         </ScrollView>
@@ -90,7 +86,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2, borderBottomColor: PIRATE.gold,
   },
   titleRow: { flexDirection: 'row', alignItems: 'center' },
-  headerTitle: { color: PIRATE.goldLight, fontSize: 18, fontWeight: 'bold', marginLeft: 10 },
+  headerTitle: { color: PIRATE.goldLight, fontSize: 16, fontWeight: 'bold', marginLeft: 10 },
   screenContent: {
     backgroundColor: PIRATE.parchment, borderTopLeftRadius: 28, borderTopRightRadius: 28,
     flexGrow: 1, padding: 20, paddingBottom: 40,
@@ -110,7 +106,7 @@ const styles = StyleSheet.create({
   errorText: { color: PIRATE.bloodRed, textAlign: 'center', marginBottom: 12, fontSize: 15 },
   hintText: { color: PIRATE.inkFaded, textAlign: 'center', marginTop: 24, fontSize: 15, paddingHorizontal: 10 },
   nameRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  nameText: { fontSize: 24, fontWeight: 'bold', color: PIRATE.ink, textTransform: 'capitalize' },
+  nameText: { fontSize: 22, fontWeight: 'bold', color: PIRATE.ink },
   idText: { fontSize: 18, fontWeight: '600', color: PIRATE.inkFaded },
   typesRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 },
 });
