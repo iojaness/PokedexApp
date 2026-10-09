@@ -36,7 +36,8 @@ export function PokemonProvider({ children }: { children: ReactNode }) {
       const data: PokemonData = await response.json();
       setPokemon(data);
     } catch (e) {
-      setErrorMsg('Pokémon no encontrado. Verifica el nombre o número.');
+      console.log('Error:', e);
+      setErrorMsg(`Error: ${String(e)}`);
     } finally {
       setLoading(false);
     }

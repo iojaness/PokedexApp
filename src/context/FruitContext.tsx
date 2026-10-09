@@ -36,7 +36,8 @@ export function FruitProvider({ children }: { children: ReactNode }) {
       const data: FruitData = await response.json();
       setFruit(data);
     } catch (e) {
-      setErrorMsg('Fruta del Diablo no encontrada. Verifica el nombre o número.');
+      console.log('Error:', e);
+      setErrorMsg(`Error: ${String(e)}`);
     } finally {
       setLoading(false);
     }
